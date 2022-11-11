@@ -90,9 +90,9 @@ public:
         uint32_t j = 0;
         for (int i = 0; i < 32; i++)
         {
-            j <<= 1;      //j×óÒÆ£¬ÓÒ±ß²¹0
-            j |= (n & 1);  //ÓënµÄ×îµÍÎ»È¡»ò²Ù×÷
-            n >>= 1;      //nÓÒÒÆ
+            j <<= 1;      //jï¿½ï¿½ï¿½Æ£ï¿½ï¿½Ò±ß²ï¿½0
+            j |= (n & 1);  //ï¿½ï¿½nï¿½ï¿½ï¿½ï¿½ï¿½Î»È¡ï¿½ï¿½ï¿½ï¿½ï¿½
+            n >>= 1;      //nï¿½ï¿½ï¿½ï¿½
         }
         return j;
     }
@@ -169,18 +169,18 @@ void driver(int N, int b, int P) {
         inf.close();
         ouf.close();
     }
-    cout << "ÔËÐÐÊ±¼ä£º" << runt / 5 << endl;
+    cout << "ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä£º" << runt / 5 << endl;
 }
 
 int main() {
-    /*vHLL hll = vHLL(1677722, 5);
+    vHLL hll = vHLL(1677722, 5);
     const char *ip = "10.23.44.1";
     const char *d = "192.111.12.10";
     hll.insert(ip, d);
     double n = hll.getTotal();
     cout << n << endl;
-    cout << hll.estimate(ip, n) << endl;*/
-    driver(1677722, 5, 10);
+    cout << hll.estimate(ip, n) << endl;
+    //driver(1677722, 5, 10);
     /*for (int i = 0; i < 100; i++) {
         uint32_t res;
         MurmurHash3_x86_32(ip, 32, 313, &res);
