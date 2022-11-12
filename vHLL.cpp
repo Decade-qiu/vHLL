@@ -44,7 +44,7 @@ public:
         ms_[index] = max(ms_[index], q);
     }
 
-    double estimate(const char* src, double n) const {
+    vector<double> estimate(const char* src, double n) const {
         uint32_t f = 0;
         MurmurHash3_x86_32(src, 32, SEED, &f);
         double sum = 0;
@@ -63,7 +63,8 @@ public:
             ns = -m_*log2(zero / m_);
         }
         double nf = (1.0 * N_ * m_ / (N_ - m_)) * (ns / m_ - n / N_);
-        return round(nf + 0.5);
+        vector<double> ret = {m_ / sum, nf};
+        return ret;
     }
 
     double getTotal() {
@@ -90,9 +91,9 @@ public:
         uint32_t j = 0;
         for (int i = 0; i < 32; i++)
         {
-            j <<= 1;      //j���ƣ��ұ߲�0
-            j |= (n & 1);  //��n�����λȡ�����
-            n >>= 1;      //n����
+            j <<= 1;      
+            j |= (n & 1);  
+            n >>= 1;     
         }
         return j;
     }
@@ -131,7 +132,8 @@ void driver(int N, int b, int P) {
     for (auto& p : filesystem::directory_iterator(pkt_data)) {
         vHLL hll = vHLL(N, b);
         inf.open(p.path().string(), ios::in);
-        ouf.open(res_data + "//size" + idx + ".txt"); idx++;
+        /*ouf.open(res_data + "//size" + idx + ".txt"); idx++;*/
+        ouf.open(res_data + "//"+to_string(P) + "ret" + idx + ".txt"); idx++;
         unordered_map<string, unordered_set<string>> flow;
         int sample = 0;
         LARGE_INTEGER tt1, tt2, tc;
@@ -160,27 +162,30 @@ void driver(int N, int b, int P) {
         for (auto& cur : flow) {
             string f = cur.first;
             unordered_set<string> ss = cur.second;
-            double esi = hll.estimate(f.c_str(), n);
+            vector<double> esi = hll.estimate(f.c_str(), n);
+            double ave = esi[0], nf = esi[1];
             am = max(am, ss.size());
-            em = max(em, esi);
-            ouf << ss.size() << " " << esi << endl;
+            em = max(em, nf);
+            //ouf << ss.size() << " " << esi << endl;
+            ouf << ss.size() << " " << nf << " "
+                << ave << " " << (double)P/100 << endl;
         }
         cout << am << " " << em << endl;
         inf.close();
         ouf.close();
     }
-    cout << "����ʱ�䣺" << runt / 5 << endl;
+    cout << "运行时间"  << endl;
 }
 
 int main() {
-    vHLL hll = vHLL(1677722, 5);
+   /* vHLL hll = vHLL(1677722, 5);
     const char *ip = "10.23.44.1";
     const char *d = "192.111.12.10";
     hll.insert(ip, d);
     double n = hll.getTotal();
     cout << n << endl;
-    cout << hll.estimate(ip, n) << endl;
-    //driver(1677722, 5, 10);
+    cout << hll.estimate(ip, n) << endl;*/
+    driver(1677722, 5, 10);
     /*for (int i = 0; i < 100; i++) {
         uint32_t res;
         MurmurHash3_x86_32(ip, 32, 313, &res);
