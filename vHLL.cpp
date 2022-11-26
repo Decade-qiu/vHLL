@@ -78,8 +78,11 @@ public:
             if (ms_[index] == 0) zero++;
         }
         double ave = m_ / sum;
-        //ave = 0.008661963939488782 * ave * ave + 1.2152514269450094 * ave - 0.21991023804331547;
+        ave = +6.1408955134869e-09 * ave * ave * ave * ave * ave - 1.4236302313600084e-06 * ave * ave * ave * ave - 6.739870650192814e-05 * ave * ave * ave + 0.030663691529082764 * ave * ave + 1.0413698338010677 * ave - 0.00015223961596292078;
         double ns = 1.0 * alpha(m_) * m_ * ave;
+        /*if (ns < 2.5 * m_ && zero != 0) {
+            ns = -m_ * log2(zero/m_);
+        }*/
         double nf = (1.0 * N_ * m_ / (N_ - m_)) * (ns / m_ - n / N_);
         vector<double> ret = { 1.0*m_ / sum, round(nf + 0.5) };
         return ret;
@@ -89,12 +92,14 @@ public:
         double sum = 0, zero = 0;
         for (int i = 0; i < N_; i++) {
             sum += 1.0 / pow(2, ms_[i]);
+            if (ms_[i] == 0) zero++;
         }
         double ave = (double)N_ / sum;
-        //ave = -0.0001697495894330087 * ave * ave + 0.03709623856264059 * ave * ave + 1.1906057074760585 * ave - 0.16254656144756013;
-        //ave = -2.3771430362972123e-05*ave*ave + 0.008661963939488782 * ave * ave + 1.2152514269450094 * ave -0.21991023804331547;
-        //ave = -1.5077544524883974e-06 * ave * ave + 0.0007378796456244439 * ave * ave + 1.128860364312081 * ave -0.1535521480349578;
+        ave = +6.1408955134869e-09 * ave * ave * ave * ave * ave - 1.4236302313600084e-06 * ave * ave * ave * ave - 6.739870650192814e-05 * ave * ave * ave + 0.030663691529082764 * ave * ave + 1.0413698338010677 * ave - 0.00015223961596292078;
         double ns = 1.0 * alpha(N_) * (double)N_ * ave;
+        /*if (ns < 2.5 * N_ && zero != 0) {
+            ns = -N_ * log2(zero/N_);
+        }*/
         return ns;
     }
 
@@ -189,6 +194,7 @@ void pkt_sampling_driver(int N, int b, int P, string res_data) {
         cout << am << " " << em << endl;
         inf.close();
         ouf.close();
+        //break;
     }
     cout << "Completed!"  << endl;
 }
@@ -219,7 +225,7 @@ void element_sampling_driver(int N, int b, int P, string res_data) {
             }
             flow[t1].insert(t2);
             uint32_t e = 0;
-            MurmurHash3_x86_32((const uint32_t*)t1.c_str(), 32, 0, &e);
+            MurmurHash3_x86_32((const uint32_t*)t2.c_str(), 32, 0, &e);
             if (100.0*e <= 1.0*UINT32_MAX*P) hll.insert((const uint32_t*)t1.c_str(), (const uint32_t*)t2.c_str());
         }
         cout << flow.size() << endl;
@@ -337,11 +343,11 @@ int main() {
     string pkt = "e://desktop//res";
     string element = "e://desktop//res//element";
     string r = "e://desktop//res//base";
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 1; i++) {
         //pkt_sampling_Throughout(1677722, 5, p[i]);
         //element_sampling_Throughout(1677722, 5, p[i]);
-        //pkt_sampling_driver(1677722, 5, p[i], pkt);
-        element_sampling_driver(1677722, 5, p[i], element);
+        pkt_sampling_driver(1677722, 5, 30, r);
+        //element_sampling_driver(1677722, 5, p[i], element);
     }
     /*vHLL hll = vHLL(1677722, 5);
     const char *ip = "10.23.44.1";
