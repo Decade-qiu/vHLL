@@ -21,7 +21,7 @@ public:
     int b_ = 0;
     int m_ = 0;
     int N_ = 0;
-    int LEN = 32;
+    int LEN = 13;
     uint32_t SEED = 0;
 
 
@@ -87,7 +87,8 @@ public:
             ns = -m_ * log(zero/m_);
         }
         double nf = (1.0 * N_ * m_ / (N_ - m_)) * (ns / m_ - n / N_);
-        if (P == 10) nf = +2.115340123799178e-17 * nf * nf * nf * nf * nf * nf * nf - 1.1256140728656618e-13 * nf * nf * nf * nf * nf * nf + 2.249795999138142e-10 * nf * nf * nf * nf * nf - 2.047892577515146e-07 * nf * nf * nf * nf + 7.935351082867359e-05 * nf * nf * nf - 0.008644351623126996 * nf * nf + 2.1973808873316045 * nf - 1.9577326577386387;
+        //if (P == 10) nf = -1.2779507813629738e-15 * nf * nf * nf * nf * nf * nf * nf + 4.4808506912206364e-12 * nf * nf * nf * nf * nf * nf - 5.893656167514115e-09 * nf * nf * nf * nf * nf + 3.491017568948581e-06 * nf * nf * nf * nf - 0.0008816924328056596 * nf * nf * nf + 0.08573034355711665 * nf * nf - 0.4343602365491435 * nf + 1.6445171211548977;
+        /*if (P == 10) nf = +2.115340123799178e-17 * nf * nf * nf * nf * nf * nf * nf - 1.1256140728656618e-13 * nf * nf * nf * nf * nf * nf + 2.249795999138142e-10 * nf * nf * nf * nf * nf - 2.047892577515146e-07 * nf * nf * nf * nf + 7.935351082867359e-05 * nf * nf * nf - 0.008644351623126996 * nf * nf + 2.1973808873316045 * nf - 1.9577326577386387;
         else if (P == 20) nf = -1.1476009300998414e-18 * nf * nf * nf * nf * nf * nf * nf + 6.175660565393717e-15 * nf * nf * nf * nf * nf * nf - 1.1908710546093112e-11 * nf * nf * nf * nf * nf + 9.766204510632295e-09 * nf * nf * nf * nf - 3.6076510787704976e-06 * nf * nf * nf + 0.0011484450317673339 * nf * nf + 1.4221517162156627 * nf - 1.110003955048971;
         else if (P == 30) nf = -7.724100960823974e-20 * nf * nf * nf * nf * nf * nf * nf + 1.185213998384578e-15 * nf * nf * nf * nf * nf * nf - 4.991272942117753e-12 * nf * nf * nf * nf * nf + 8.549907906449684e-09 * nf * nf * nf * nf - 6.259473229940573e-06 * nf * nf * nf + 0.001894217467541572 * nf * nf + 1.1790722109507126 * nf - 1.0081630791990335;
         else if (P == 40) nf = +2.0517887861068614e-19 * nf * nf * nf * nf * nf * nf * nf - 1.4303112386843354e-15 * nf * nf * nf * nf * nf * nf + 3.325516034268529e-12 * nf * nf * nf * nf * nf - 2.7335177248263074e-09 * nf * nf * nf * nf + 1.6708135263850997e-07 * nf * nf * nf + 0.0005565316477764249 * nf * nf + 1.1225656488248998 * nf - 0.9589160649479493;
@@ -95,8 +96,7 @@ public:
         else if (P == 60) nf = +3.720794992102691e-20 * nf * nf * nf * nf * nf * nf * nf - 3.1593786810697714e-16 * nf * nf * nf * nf * nf * nf + 9.255739100641945e-13 * nf * nf * nf * nf * nf - 1.0274828557120334e-09 * nf * nf * nf * nf + 2.2165877246052306e-07 * nf * nf * nf + 0.000244699661669841 * nf * nf + 1.026698180972445 * nf - 1.0239748196286018;
         else if (P == 70) nf = +9.43900546218361e-21 * nf * nf * nf * nf * nf * nf * nf - 8.941649490294502e-17 * nf * nf * nf * nf * nf * nf + 2.8174050149643037e-13 * nf * nf * nf * nf * nf - 2.909395298749796e-10 * nf * nf * nf * nf - 7.442696628945217e-08 * nf * nf * nf + 0.0002693612702674616 * nf * nf + 0.9846310308653047 * nf - 0.9941755252978641;
         else if (P == 80) nf = -2.730632379269233e-21 * nf * nf * nf * nf * nf * nf * nf + 3.875466779168853e-17 * nf * nf * nf * nf * nf * nf - 2.121694745242347e-13 * nf * nf * nf * nf * nf + 5.555881209755576e-10 * nf * nf * nf * nf - 7.038562424257159e-07 * nf * nf * nf + 0.00043317313202772677 * nf * nf + 0.9449526498354037 * nf - 0.9818122938855343;
-        else if (P == 90) nf = +1.6779656926474064e-23 * nf * nf * nf * nf * nf * nf * nf + 2.8789688363077657e-19 * nf * nf * nf * nf * nf * nf - 9.978030410293229e-15 * nf * nf * nf * nf * nf + 6.701778064373672e-11 * nf * nf * nf * nf - 1.7817855535423915e-07 * nf * nf * nf + 0.00022876103285848727 * nf * nf + 0.9371138992890357 * nf - 1.115580832199844;
-        else if (P == 100) nf = +4.807349035426421e-22 * nf * nf * nf * nf * nf * nf * nf - 7.94224238851793e-18 * nf * nf * nf * nf * nf * nf + 4.5269073699623554e-14 * nf * nf * nf * nf * nf - 1.0235531433111993e-10 * nf * nf * nf * nf + 4.796199857745417e-08 * nf * nf * nf + 0.00012496979534414095 * nf * nf + 0.9268351772522895 * nf - 1.1353611591862454;
+        else if (P == 90) nf = +1.6779656926474064e-23 * nf * nf * nf * nf * nf * nf * nf + 2.8789688363077657e-19 * nf * nf * nf * nf * nf * nf - 9.978030410293229e-15 * nf * nf * nf * nf * nf + 6.701778064373672e-11 * nf * nf * nf * nf - 1.7817855535423915e-07 * nf * nf * nf + 0.00022876103285848727 * nf * nf + 0.9371138992890357 * nf - 1.115580832199844;*/
         double nn = round(nf + 0.5);
         if (nn < 1) nn = 1;
         ret.push_back(nn);
@@ -176,7 +176,7 @@ void pkt_sampling_driver(int N, int b, int P, string res_data) {
     string test[] = { "05.txt","06.txt"};
     string buf = "1",t1 = "1", t2 = "1";
     char idx = '1';
-    for (auto& p : test) {
+    for (auto& p : train) {
         vHLL hll = vHLL(N, b);
         inf.open(pkt_data+p, ios::in);
         //ouf.open(res_data + "//size" + idx + ".txt"); idx++;
@@ -365,7 +365,8 @@ int main() {
     string pkt = "e://desktop//res";
     string element = "e://desktop//res//element";
     string r = "e://desktop//res//base";
-    for (int i = 9; i >= 0; i--) {
+    string test = "e://desktop//res//test";
+    for (int i = 0; i < 1; i++) {
         //pkt_sampling_Throughout(1677722, 5, p[i]);
         pkt_sampling_driver(1677722, 5, p[i], pkt);
     }
