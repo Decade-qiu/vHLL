@@ -64,7 +64,7 @@ public:
         ms_[index] = max(ms_[index], leftmost_index);
     }
 
-    vector<double> getParm(const uint32_t* src, double n, int P) const {
+    vector<double> getParm(const uint32_t* src, double n) const {
         uint32_t f = 0;
         MurmurHash3_x86_32(src, LEN, SEED, &f);
         double sum = 0;
@@ -73,7 +73,6 @@ public:
         for (int i = 0; i < m_; i++) {
             uint32_t index = 0;
             string tp = to_string(f ^ seed_gen[i]);
-            //string tp = to_string(f ^ i);
             MurmurHash3_x86_32((const uint32_t*)tp.c_str(), LEN, SEED, &index);
             index %= N_;
             ret.push_back(ms_[index]);
@@ -107,63 +106,6 @@ public:
         return ns;
     }
 
-    void Elem_insert(const uint32_t* src, const uint32_t* dst) {
-        uint32_t f = 0;
-        uint32_t e = 0;
-        MurmurHash3_x86_32(src, LEN, SEED, &f);
-        MurmurHash3_x86_32(dst, LEN, SEED, &e);
-        int p = e >> (32 - b_);
-        int q = e - (p << (32 - b_));
-        int leftmost_index = 0;
-        while (q > 0) {
-            leftmost_index++;
-            q >>= 1;
-        }
-        leftmost_index = 32 - b_ - leftmost_index + 1;
-        uint32_t index = 0;
-        string tp = to_string(f ^ seed_gen[p]);
-        MurmurHash3_x86_32((const uint32_t*)tp.c_str(), LEN, SEED, &index);
-        index %= N_;
-        ms_[index] = max(ms_[index], leftmost_index);
-    }
-
-    vector<double> Elem_getParm(const uint32_t* src, double n, double P) const {
-        uint32_t f = 0;
-        MurmurHash3_x86_32(src, LEN, SEED, &f);
-        double sum = 0;
-        double zero = 0;
-        for (int i = 0; i < m_; i++) {
-            uint32_t index = 0;
-            string tp = to_string(f ^ seed_gen[i]);
-            MurmurHash3_x86_32((const uint32_t*)tp.c_str(), LEN, SEED, &index);
-            index %= N_;
-            sum += 1.0 / pow(2, ms_[index]);
-            if (ms_[index] == 0) zero++;
-        }
-        double ave = m_ / sum;
-        double ns = 1.0 * alpha(m_) * m_ * ave;
-        if (ns < 2.5 * m_ && zero != 0) {
-            ns = -m_ * log(zero / m_);
-        }
-        double nf = (1.0 * N_ * m_ / (N_ - m_)) * (ns / m_ - n / N_);
-        nf = round(nf + 0.5);
-        vector<double> ret = { 1.0 * m_ / sum,  nf<=1?1:nf};
-        return ret;
-    }
-
-    double Elem_getTotal(double P) {
-        double sum = 0, zero = 0;
-        for (int i = 0; i < N_; i++) {
-            sum += 1.0 / pow(2, ms_[i]);
-        }
-        double ave = (double)N_ / sum;
-        double ns = 1.0 * alpha(N_) * (double)N_ * ave;
-        if (ns < 2.5 * N_ && zero != 0) {
-            ns = -N_ * log(zero / N_);
-        }
-        return ns;
-    }
-
     double alpha(int t) const {
         switch (t) {
         case 16:
@@ -189,12 +131,11 @@ void pkt_sampling_driver(int N, int b, int P, string res_data) {
     for (auto& p : test) {
         vHLL hll = vHLL(N, b);
         inf.open(pkt_data+p, ios::in);
-        //ouf.open(res_data + "//size" + idx + ".txt"); idx++;
         ouf.open(res_data + "//"+to_string(P) + "ret" + idx + ".txt"); idx++;
         unordered_map<string, unordered_set<string>> flow;
-        int sample = 0, count = 0;
+        int sample = 0;
         while (getline(inf, buf)) {
-            if (sample == 100) sample = 0;
+            if (sample == 10) sample = 0;
             for (int i = 0; i < buf.size(); i++) {
                 if (buf[i] == ' ') {
                     t2 = buf.substr(0, i);
@@ -203,7 +144,7 @@ void pkt_sampling_driver(int N, int b, int P, string res_data) {
                 }
             }
             flow[t1].insert(t2);
-            if (sample++ < P) hll.insert((const uint32_t*)t1.c_str(), (const uint32_t*)t2.c_str());
+            if (sample++ < P/10) hll.insert((const uint32_t*)t1.c_str(), (const uint32_t*)t2.c_str());
         }
         cout << flow.size() << endl;
         double n = hll.getTotal();
@@ -213,7 +154,7 @@ void pkt_sampling_driver(int N, int b, int P, string res_data) {
         for (auto& cur : flow) {
             string f = cur.first;
             uint32_t ss = cur.second.size();
-            vector<double> esi = hll.getParm((const uint32_t*)f.c_str(), n, P);
+            vector<double> esi = hll.getParm((const uint32_t*)f.c_str(), n);
             double nf = esi[32], ave = esi[33];
             am = max(am, ss);
             em = max(em, nf);
@@ -224,7 +165,7 @@ void pkt_sampling_driver(int N, int b, int P, string res_data) {
         cout << am << " " << em << endl;
         inf.close();
         ouf.close();
-        if (idx == '3')break;
+        break;
     }
     cout << "Completed!"  << endl;
 }
@@ -269,8 +210,8 @@ void element_sampling_driver(int N, int b, int P, string res_data) {
         for (auto& cur : flow) {
             string f = cur.first;
             uint32_t ss = cur.second.size();
-            vector<double> esi = hll.getParm((const uint32_t*)f.c_str(), n, P);
-            double ave = esi[0], nf = esi[32]*100/P;
+            vector<double> esi = hll.getParm((const uint32_t*)f.c_str(), n);
+            double nf = esi[32]*100/P;
             am = max(am, ss);
             em = max(em, nf);
             ouf << ss << " " << nf <<  endl;
@@ -316,7 +257,7 @@ void pkt_sampling_Throughout(int N, int b, int P) {
         clock_t time2 = clock();
         runt += (double)(time2 - time1) / CLOCKS_PER_SEC;
         inf.close();
-        if (cnt == 1) break;
+        if (cnt == 0) break;
         ++cnt;
     }
     /*cout << "pkt:" << flowNum << " "
@@ -324,6 +265,7 @@ void pkt_sampling_Throughout(int N, int b, int P) {
         "thoughout:" << (flowNum / 1000000.0) / runt << "mpps " 
         "ave_insert_time"<< runt*1000000000.0/flowNum << "ns" << endl*/
     cout << (flowNum / 1000000.0) / runt << ", ";
+    if (P == 100) cout << endl;
     //cout << flowNum << " " << runt << endl;
 }
 
@@ -353,7 +295,7 @@ void element_sampling_Throughout(int N, int b, int P) {
         clock_t time1 = clock();
         for (int i = 0; i < pkt.size(); i++) {
             uint32_t e = 0;
-            MurmurHash3_x86_32((const uint32_t*)pkt[i][1].c_str(), 32, 0, &e);
+            MurmurHash3_x86_32((const uint32_t*)pkt[i][1].c_str(), 32, 1331, &e);
             if (e <= pow(2, 32)*P/100) {
                 hll.insert((const uint32_t*)pkt[i][0].c_str(), (const uint32_t*)pkt[i][1].c_str());
             }
@@ -361,7 +303,7 @@ void element_sampling_Throughout(int N, int b, int P) {
         clock_t time2 = clock();
         runt += (double)(time2 - time1) / CLOCKS_PER_SEC;
         inf.close();
-        if (cnt == 1) break;
+        if (cnt == 0) break;
         ++cnt;
     }
     /*cout << "pkt:" << flowNum << " "
@@ -369,23 +311,96 @@ void element_sampling_Throughout(int N, int b, int P) {
         "thoughout:" << (flowNum / 1000000.0) / runt << "mpps "
         "ave_insert_time"<< runt*1000000000.0/flowNum << "ns" << endl*/
     cout << (flowNum / 1000000.0) / runt << ", ";
+    if (P == 100) cout << endl;
+}
+
+void vHLL_driver(int N, int b, string res_data) {
+    ifstream inf;
+    ofstream ouf;
+    string pkt_data = "E://DeskTop//train//";
+    string test[] = { "00.txt"};
+    string buf = "1", t1 = "1", t2 = "1";
+    char idx = '1';
+    for (auto& p : test) {
+        vHLL hll = vHLL(N, b);
+        inf.open(pkt_data + p, ios::in);
+        ouf.open(res_data + "//" + "size" + idx + ".txt"); idx++;
+        unordered_map<string, unordered_set<string>> flow;
+        int sample = 0;
+        while (getline(inf, buf)) {
+            if (sample == 10) sample = 0;
+            for (int i = 0; i < buf.size(); i++) {
+                if (buf[i] == ' ') {
+                    t1 = buf.substr(0, i);
+                    t2 = buf.substr(i + 1);
+                    break;
+                }
+            }
+            flow[t1].insert(t2);
+            if (sample++ < 1) hll.insert((const uint32_t*)t1.c_str(), (const uint32_t*)t2.c_str());
+        }
+        double n = hll.getTotal();
+        for (auto& cur : flow) {
+            string f = cur.first;
+            uint32_t ss = cur.second.size();
+            vector<double> esi = hll.getParm((const uint32_t*)f.c_str(), n);
+            double nf = esi[32];
+            ouf << ss << " " << nf << " " << 0 << " ";
+            for (int i = 0; i < hll.m_; i++) ouf << esi[i] << " ";
+            ouf << endl;
+        }
+        inf.close();
+        ouf.close();
+    }
+    cout << "Completed!" << endl;
+}
+
+void count_pkt_nums() {
+    string train[] = { "00.txt","01.txt","02.txt","03.txt","04.txt" };
+    string var[] = { "05.txt" };
+    string test[] = { "06.txt"};
+    ifstream inf;
+    string pkt_data = "E://DeskTop//train//";
+    string buf, t1, t2;
+    int a = 0, b = 0, c = 0;
+    for (auto& p : train) {
+        inf.open(pkt_data + p, ios::in);
+        while (getline(inf, buf)) a++;
+        inf.close();
+    }
+    for (auto& p : var) {
+        inf.open(pkt_data + p, ios::in);
+        while (getline(inf, buf)) b++;
+        inf.close();
+    }
+    for (auto& p : test) {
+        inf.open(pkt_data + p, ios::in);
+        while (getline(inf, buf)) c++;
+        inf.close();
+    }
+    cout << a << " " << b << " " << c << endl;
 }
 
 int main() {
     int p[10] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
     string pkt = "e://desktop//res";
     string element = "e://desktop//res//element";
-    string r = "e://desktop//res//base";
+    string KB256 = "e://desktop//res//KB256";
     string test = "e://desktop//res//test";
-    for (int i = 0; i < 10; i++) {
+    vHLL_driver(1677722, 5, pkt);
+    for (int i = 0; i < 1; i++) {
         //pkt_sampling_Throughout(1677722, 5, p[i]);
-        //pkt_sampling_driver(1677722, 5, p[i], pkt);
+        pkt_sampling_driver(1677722, 5, p[i], pkt);
+        //pkt_sampling_driver(419430, 5, p[i], KB256);
+        //pkt_sampling_driver(1677722, 5, p[i], test);
         //pkt_sampling_driver(419430, 5, p[i], test);
     }
     for (int i = 0; i < 10; i++) {
         //element_sampling_Throughout(1677722, 5, p[i]);
-        element_sampling_driver(1677722, 5, p[i], element);
+        //element_sampling_driver(1677722, 5, p[i], element);
+        //element_sampling_driver(419430, 5, p[i], element);
     }
+    //count_pkt_nums();
     /*int b_ = 5;
     int e = 234345;
     cout << e << endl;
