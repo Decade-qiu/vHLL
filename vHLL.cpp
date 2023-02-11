@@ -88,7 +88,6 @@ public:
         double nn = round(nf + 0.5);
         if (nn < 1) nn = 1;
         ret.push_back(nn);
-        ret.push_back(ave);
         return ret;
     }
 
@@ -174,7 +173,7 @@ void element_sampling_driver(int N, int b, int P, string res_data) {
     ifstream inf;
     ofstream ouf;
     string pkt_data = "E://DeskTop//train//";
-    string txt[] = { "00.txt","01.txt","02.txt","03.txt","04.txt" };
+    string txt[] = { "06.txt","01.txt","02.txt","03.txt","04.txt" };
     string buf = "1", t1 = "1", t2 = "1";
     char idx = '1';
     double runt = 0;
@@ -211,7 +210,7 @@ void element_sampling_driver(int N, int b, int P, string res_data) {
             string f = cur.first;
             uint32_t ss = cur.second.size();
             vector<double> esi = hll.getParm((const uint32_t*)f.c_str(), n);
-            double nf = esi[32]*100/P;
+            double nf = esi[(1<<b)] * 100 / P;
             am = max(am, ss);
             em = max(em, nf);
             ouf << ss << " " << nf <<  endl;
@@ -387,37 +386,17 @@ int main() {
     string element = "e://desktop//res//element";
     string KB256 = "e://desktop//res//KB256";
     string test = "e://desktop//res//test";
-    vHLL_driver(1677722, 5, pkt);
+    //vHLL_driver(1677722, 5, pkt);
     for (int i = 0; i < 1; i++) {
         //pkt_sampling_Throughout(1677722, 5, p[i]);
-        pkt_sampling_driver(1677722, 5, p[i], pkt);
+        //pkt_sampling_driver(1677722, 5, p[i], pkt);
         //pkt_sampling_driver(419430, 5, p[i], KB256);
         //pkt_sampling_driver(1677722, 5, p[i], test);
         //pkt_sampling_driver(419430, 5, p[i], test);
     }
     for (int i = 0; i < 10; i++) {
         //element_sampling_Throughout(1677722, 5, p[i]);
-        //element_sampling_driver(1677722, 5, p[i], element);
+        element_sampling_driver(1677722, 9, p[i], element);
         //element_sampling_driver(419430, 5, p[i], element);
     }
-    //count_pkt_nums();
-    /*int b_ = 5;
-    int e = 234345;
-    cout << e << endl;
-    int p = e >> (32 - b_);
-    int q = e - (p << (32 - b_));
-    int leftmost_index = 0;
-    while (q > 0) {
-        leftmost_index++;
-        q >>= 1;
-    }
-    leftmost_index = 32 - b_ - leftmost_index + 1;
-    cout << p << " " << leftmost_index << endl;*/
-    /*vHLL hll = vHLL(1677722, 5);
-    const char *ip = "10.23.44.1";
-    const char *d = "192.111.12.10";
-    hll.insert(ip, d);
-    double n = hll.getTotal();
-    cout << n << endl;
-    cout << hll.estimate(ip, n)[1] << endl;*/
 }
