@@ -293,11 +293,7 @@ void element_sampling_Throughout(int N, int b, int P) {
         vHLL hll = vHLL(N, b);
         clock_t time1 = clock();
         for (int i = 0; i < pkt.size(); i++) {
-            uint32_t e = 0;
-            MurmurHash3_x86_32((const uint32_t*)pkt[i][1].c_str(), 32, 1331, &e);
-            if (e <= pow(2, 32)*P/100) {
-                hll.insert((const uint32_t*)pkt[i][0].c_str(), (const uint32_t*)pkt[i][1].c_str());
-            }
+            hll.insert((const uint32_t*)pkt[i][0].c_str(), (const uint32_t*)pkt[i][1].c_str());
         }
         clock_t time2 = clock();
         runt += (double)(time2 - time1) / CLOCKS_PER_SEC;
@@ -330,26 +326,27 @@ void vHLL_driver(int N, int b, string res_data) {
             if (sample == 10) sample = 0;
             for (int i = 0; i < buf.size(); i++) {
                 if (buf[i] == ' ') {
-                    t1 = buf.substr(0, i);
-                    t2 = buf.substr(i + 1);
+                    t2 = buf.substr(0, i);
+                    t1 = buf.substr(i + 1);
                     break;
                 }
             }
             flow[t1].insert(t2);
-            if (sample++ < 1) hll.insert((const uint32_t*)t1.c_str(), (const uint32_t*)t2.c_str());
+            hll.insert((const uint32_t*)t1.c_str(), (const uint32_t*)t2.c_str());
         }
         double n = hll.getTotal();
         for (auto& cur : flow) {
             string f = cur.first;
             uint32_t ss = cur.second.size();
             vector<double> esi = hll.getParm((const uint32_t*)f.c_str(), n);
-            double nf = esi[32];
+            double nf = esi[(1<<b)];
             ouf << ss << " " << nf << " " << 0 << " ";
             for (int i = 0; i < hll.m_; i++) ouf << esi[i] << " ";
             ouf << endl;
         }
         inf.close();
         ouf.close();
+        break;
     }
     cout << "Completed!" << endl;
 }
@@ -386,17 +383,17 @@ int main() {
     string element = "e://desktop//res//element";
     string KB256 = "e://desktop//res//KB256";
     string test = "e://desktop//res//test";
-    //vHLL_driver(1677722, 5, pkt);
-    for (int i = 0; i < 1; i++) {
-        //pkt_sampling_Throughout(1677722, 5, p[i]);
+    //vHLL_driver(1677722, 9, pkt);
+    for (int i = 0; i < 10; i++) {
+        //pkt_sampling_Throughout(1677722, 9, p[i]);
         //pkt_sampling_driver(1677722, 5, p[i], pkt);
         //pkt_sampling_driver(419430, 5, p[i], KB256);
         //pkt_sampling_driver(1677722, 5, p[i], test);
         //pkt_sampling_driver(419430, 5, p[i], test);
     }
     for (int i = 0; i < 10; i++) {
-        //element_sampling_Throughout(1677722, 5, p[i]);
-        element_sampling_driver(1677722, 9, p[i], element);
+        element_sampling_Throughout(1677722, 9, p[i]);
+        //element_sampling_driver(1677722, 9, p[i], element);
         //element_sampling_driver(419430, 5, p[i], element);
     }
 }
