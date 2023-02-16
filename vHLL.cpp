@@ -391,9 +391,9 @@ int main() {
         //pkt_sampling_driver(1677722, 5, p[i], test);
         //pkt_sampling_driver(419430, 5, p[i], test);
     }
-    for (int i = 0; i < 10; i++) {
-        element_sampling_Throughout(1677722, 9, p[i]);
-        //element_sampling_driver(1677722, 9, p[i], element);
+    for (int i = 3; i < 7; i++) {
+        //element_sampling_Throughout(1677722, 9, p[i]);
+        element_sampling_driver(1677722, 9, p[i], element);
         //element_sampling_driver(419430, 5, p[i], element);
     }
 }
