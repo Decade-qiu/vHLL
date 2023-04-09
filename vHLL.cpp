@@ -123,7 +123,7 @@ void pkt_sampling_driver(int N, int b, int P, string res_data) {
     ifstream inf;
     ofstream ouf;
     string pkt_data = "E://DeskTop//train//";
-    string train[] = {"06.txt","01.txt","02.txt","03.txt","04.txt"};
+    string train[] = {"00.txt","01.txt","02.txt","03.txt","04.txt"};
     string test[] = { "05.txt","06.txt"};
     string buf = "1",t1 = "1", t2 = "1";
     char idx = '1';
@@ -143,7 +143,7 @@ void pkt_sampling_driver(int N, int b, int P, string res_data) {
                 }
             }
             flow[t1].insert(t2);
-            if (sample++ < P/10) hll.insert((const uint32_t*)t1.c_str(), (const uint32_t*)t2.c_str());
+            if (sample++ < P) hll.insert((const uint32_t*)t1.c_str(), (const uint32_t*)t2.c_str());
         }
         cout << flow.size() << endl;
         double n = hll.getTotal();
@@ -226,7 +226,7 @@ void element_sampling_driver(int N, int b, int P, string res_data) {
 void pkt_sampling_Throughout(int N, int b, int P) {
     ifstream inf;
     string pkt_data = "E://DeskTop//train//";
-    string txt[] = { "06.txt","01.txt","02.txt","03.txt","04.txt" };
+    string txt[] = { "01.txt","01.txt","02.txt","03.txt","04.txt" };
     string buf, t1, t2;
     double runt = 0;
     int sample = 0, flowNum = 0, cnt = 0;
@@ -247,16 +247,16 @@ void pkt_sampling_Throughout(int N, int b, int P) {
         flowNum += pkt.size();
         vHLL hll = vHLL(N, b);
         clock_t time1 = clock();
-        for (int i = 0; i < pkt.size();i++, sample++) {
+        for (int i = 0; i < pkt.size();i++) {
             if (sample == 100) sample = 0;
-            if (sample < P) {
+            if (sample++ < P) {
                 hll.insert((const uint32_t*)pkt[i][0].c_str(), (const uint32_t*)pkt[i][1].c_str());
             }
         }
         clock_t time2 = clock();
         runt += (double)(time2 - time1) / CLOCKS_PER_SEC;
         inf.close();
-        if (cnt == 2) break;
+        if (cnt == 0) break;
         ++cnt;
     }
     /*cout << "pkt:" << flowNum << " "
@@ -264,14 +264,14 @@ void pkt_sampling_Throughout(int N, int b, int P) {
         "thoughout:" << (flowNum / 1000000.0) / runt << "mpps " 
         "ave_insert_time"<< runt*1000000000.0/flowNum << "ns" << endl*/
     cout << (flowNum / 1000000.0) / runt << ", ";
-    if (P == 100) cout << endl;
+    if (P == 85) cout << endl;
     //cout << flowNum << " " << runt << endl;
 }
 
 void element_sampling_Throughout(int N, int b, int P) {
     ifstream inf;
     string pkt_data = "E://DeskTop//train//";
-    string txt[] = { "06.txt","01.txt","02.txt","03.txt","04.txt" };
+    string txt[] = { "01.txt","01.txt","02.txt","03.txt","04.txt" };
     string buf, t1, t2;
     double runt = 0;
     int sample = 0, flowNum = 0, cnt = 0, ss = 0, ma = 0;
@@ -302,11 +302,11 @@ void element_sampling_Throughout(int N, int b, int P) {
         clock_t time2 = clock();
         runt += (double)(time2 - time1) / CLOCKS_PER_SEC;
         inf.close();
-        if (cnt == 2) break;
+        if (cnt == 0) break;
         ++cnt;
     }
     cout << (flowNum / 1000000.0) / runt << ", ";
-    if (P == 100) cout << endl;
+    if (P == 85) cout << endl;
 }
 
 void vhLL_Throughout(int N, int b, int P) {
@@ -339,11 +339,11 @@ void vhLL_Throughout(int N, int b, int P) {
         clock_t time2 = clock();
         runt += (double)(time2 - time1) / CLOCKS_PER_SEC;
         inf.close();
-        if (cnt == 2) break;
+        if (cnt == 0) break;
         ++cnt;
     }
     cout << (flowNum / 1000000.0) / runt << ", ";
-    if (P == 100) cout << endl;
+    cout << endl;
 }
 
 void vHLL_driver(int N, int b, string res_data) {
@@ -418,20 +418,14 @@ int main() {
     int p[10] = { 40, 45, 50, 55, 60, 65, 70, 75, 80, 85 };
     string pkt = "e://desktop//res";
     string element = "e://desktop//res//element";
-    string KB256 = "e://desktop//res//KB256";
-    string test = "e://desktop//res//test";
-    //vHLL_driver(1677722*0.4, 8, pkt);
-    //vhLL_Throughout(1677722 * 0.4, 8, 0);
+    vHLL_driver(1677722, 8, pkt);
+    //vhLL_Throughout(1677722, 8, 0);
     for (int i = 0; i < 10; i++) {
-        //pkt_sampling_Throughout(1677722*0.4, 8, p[i]);
-        //pkt_sampling_driver(1677722, 5, p[i], pkt);
-        //pkt_sampling_driver(419430, 5, p[i], KB256);
-        //pkt_sampling_driver(1677722, 5, p[i], test);
-        //pkt_sampling_driver(419430, 5, p[i], test);
+        //pkt_sampling_Throughout(1677722, 8, p[i]);
+        //pkt_sampling_driver(1677722, 8, p[i], pkt);
     }
     for (int i = 0; i < 10; i++) {
-        //element_sampling_Throughout(1677722*0.9, 8, p[i]);
-        element_sampling_driver(1677722*0.9, 8, p[i], element);
-        //element_sampling_driver(419430, 5, p[i], element);
+        //element_sampling_Throughout(1677722, 8, p[i]);
+        //element_sampling_driver(1677722, 8, p[i], element);
     }
 }
